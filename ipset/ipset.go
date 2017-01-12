@@ -79,6 +79,10 @@ func (s *IPSet) createHashSet(name string) error {
 /*	out, err := exec.Command("/usr/bin/sudo",
 		ipsetPath, "create", name, s.HashType, "family", s.HashFamily, "hashsize", strconv.Itoa(s.HashSize),
 		"maxelem", strconv.Itoa(s.MaxElem), "timeout", strconv.Itoa(s.Timeout), "-exist").CombinedOutput()*/
+	if exists(name) {
+		log.Printf("already exists chain %s", name)
+		return nil
+	}
 	out, err := exec.Command(ipsetPath, "create", name, s.HashType, "family", s.HashFamily, "hashsize", strconv.Itoa(s.HashSize),
 		"maxelem", strconv.Itoa(s.MaxElem), "timeout", strconv.Itoa(s.Timeout), "-exist").CombinedOutput()
 	if err != nil {
@@ -187,8 +191,8 @@ func (s *IPSet) Del(entry string) error {
 }
 
 // Exists is used to check wheater the name is already create
-func (s *IPSet) Exists(chain string) bool {
-	out, err := exec.Command(ipsetPath, "list", chain).CombinedOutput()
+func exists(chain string) bool {
+	_, err := exec.Command(ipsetPath, "list", chain).CombinedOutput()
 	if err != nil {
 		return false
 	}
